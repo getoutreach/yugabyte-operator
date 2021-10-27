@@ -62,7 +62,8 @@ type YBMasterSpec struct {
 	Storage             YBStorageSpec                  `json:"storage,omitempty"`
 	Resources           v1.ResourceRequirements        `json:"resources,omitempty"`
 	// +kubebuilder:validation:MinItems=1
-	Gflags []YBGFlagSpec `json:"gflags,omitempty"`
+	Gflags   []YBGFlagSpec `json:"gflags,omitempty"`
+	Affinity *v1.Affinity  `json:"nodeAffinity,omitempty"`
 }
 
 // YBTServerSpec defines attributes for YBTServer pods.
@@ -85,7 +86,8 @@ type YBTServerSpec struct {
 	Storage             YBStorageSpec                  `json:"storage,omitempty"`
 	Resources           v1.ResourceRequirements        `json:"resources,omitempty"`
 	// +kubebuilder:validation:MinItems=1
-	Gflags []YBGFlagSpec `json:"gflags,omitempty"`
+	Gflags   []YBGFlagSpec `json:"gflags,omitempty"`
+	Affinity *v1.Affinity  `json:"nodeAffinity,omitempty"`
 }
 
 // YBStorageSpec defines storage specific attributes for YBMaster/YBTserver pods.

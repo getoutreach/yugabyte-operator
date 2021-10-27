@@ -119,6 +119,83 @@ spec:
                     storageClass:
                       type: string
                   type: object
+                affinity:
+                  type: object
+                  properties:
+                    nodeAffinity:
+                      type: object
+                      properties:
+                        preferredDuringSchedulingIgnoredDuringExecution:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              preference:
+                                type: object
+                                properties:
+                                  matchExpressions:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                                  matchFields:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                              weight:
+                                type: integer
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          type: object
+                          properties:
+                            nodeSelectorTerms:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  matchExpressions:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                                  matchFields:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                        
               type: object
             replicationFactor:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster

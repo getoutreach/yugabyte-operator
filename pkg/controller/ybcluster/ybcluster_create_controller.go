@@ -217,6 +217,15 @@ func createStatefulSet(cluster *yugabytev1alpha1.YBCluster, isTServerStatefulset
 			Selector: &metav1.LabelSelector{
 				MatchLabels: podLabels,
 			},
+			// Affinity: &apiv1.Affinity{NodeAffinity: &apiv1.NodeAffinity{
+			// 	RequiredDuringSchedulingIgnoredDuringExecution: &apiv1.NodeSelector{
+			// 		NodeSelectorTerms: []apiv1.NodeSelectorTerm{{
+			// 			MatchExpressions: []apiv1.NodeSelectorRequirement{
+			// 				{Key: "outreach.io/nodepool", Operator: apiv1.NodeSelectorOpIn, Values: []string{"stable-nodes"}},
+			// 			},
+			// 		}},
+			// 	},
+			// }},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: cluster.Namespace,
@@ -257,7 +266,7 @@ func getVolumeClaimTemplates(storageSpec *yugabytev1alpha1.YBStorageSpec) *[]cor
 }
 
 func createPodSpec(cluster *yugabytev1alpha1.YBCluster, isTServerStatefulset bool, name, serviceName string) corev1.PodSpec {
-	return corev1.PodSpec{
+	spec := corev1.PodSpec{
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: &corev1.PodAntiAffinity{
 				PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
@@ -278,10 +287,37 @@ func createPodSpec(cluster *yugabytev1alpha1.YBCluster, isTServerStatefulset boo
 					},
 				},
 			},
+			NodeAffinity: &corev1.NodeAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+					NodeSelectorTerms: []corev1.NodeSelectorTerm{{
+						MatchExpressions: []corev1.NodeSelectorRequirement{
+							{Key: "outreach.io/nodepool", Operator: corev1.NodeSelectorOpIn, Values: []string{"stable-nodes"}},
+						},
+					}},
+				},
+			},
 		},
 		Containers: []corev1.Container{createContainer(cluster, isTServerStatefulset, name, serviceName)},
 		Volumes:    getVolumes(cluster.Spec.TLS.Enabled, isTServerStatefulset),
+		Tolerations: []corev1.Toleration{
+			{Key: "dedicated", Operator: "Equal", Value: "stable", Effect: "NoSchedule"},
+		},
 	}
+
+	// commenting this out, experimental adding to CRD, using the above hard coded node pool and tolerations(for now)
+	// // currently the cluster spec only supports node affinity, both pod affinity and anti-affinity are not implemented
+	// // https://github.com/kubernetes/api/blob/7d47955f01bdcc2946a794248c1a65e3d419c0c9/core/v1/types.go#L2716
+	// if isTServerStatefulset && cluster.Spec.Tserver.Affinity != nil {
+	// 	fmt.Printf("creating node affinity for tserver: %+v\n", cluster.Spec.Tserver.Affinity)
+	// 	spec.Affinity = cluster.Spec.Tserver.Affinity
+	// } else if cluster.Spec.Master.Affinity != nil {
+	// 	fmt.Printf("creating node affinity for master: %+v\n", cluster.Spec.Master.Affinity)
+	// 	spec.Affinity = cluster.Spec.Master.Affinity
+	// }
+
+	fmt.Printf("podspec: %+v\n", spec)
+
+	return spec
 }
 
 func createContainer(cluster *yugabytev1alpha1.YBCluster, isTServerStatefulset bool, name, serviceName string) corev1.Container {
