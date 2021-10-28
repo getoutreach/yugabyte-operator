@@ -2,7 +2,7 @@ apiVersion: yugabyte.com/v1alpha1
 kind: YBCluster
 metadata:
   name: example-ybcluster
-  namespace: yb-operator
+  namespace: tmp-smartstore 
 spec:
   image:
     repository: yugabytedb/yugabyte
@@ -18,18 +18,28 @@ spec:
     podManagementPolicy: Parallel
     storage:
       count: 1
-      size: 1Gi
+      size: 50Gi
       storageClass: standard
     resources:
       requests:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 2000m
+        memory: 2Gi
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 2000m
+        memory: 2Gi
     gflags:
-      - key: default_memory_limit_to_ram_ratio
-        value: "0.85"
+      - key: memory_limit_hard_bytes
+        value: "2147483648"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: outreach.io/nodepool
+              operator: In
+              values:
+              - stable-nodes
+
 
   tserver:
     replicas: 3
@@ -42,15 +52,17 @@ spec:
     podManagementPolicy: Parallel
     storage:
       count: 1
-      size: 1Gi
+      size: 100Gi
       storageClass: standard
     resources:
       requests:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 4000m
+        memory: 8Gi
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 4000m
+        memory: 8Gi
     gflags:
-      - key: default_memory_limit_to_ram_ratio
-        value: "0.85"
+      - key: ysql_num_shards_per_tserver 
+        value: "1"
+      - key: memory_limit_hard_bytes
+        value: "8589934592"
