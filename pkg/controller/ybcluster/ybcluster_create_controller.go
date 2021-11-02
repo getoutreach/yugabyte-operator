@@ -339,7 +339,7 @@ func createContainer(cluster *yugabytev1alpha1.YBCluster, isTServerStatefulset b
 	return corev1.Container{
 		Name:            name,
 		Image:           strings.Join([]string{cluster.Spec.Image.Repository, cluster.Spec.Image.Tag}, ":"),
-		ImagePullPolicy: corev1.PullAlways,
+		ImagePullPolicy: cluster.Spec.Image.PullPolicy,
 		Env: []corev1.EnvVar{
 			{
 				Name:  envGetHostsFrom,
